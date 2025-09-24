@@ -37,6 +37,15 @@ class RemindersService {
     func getDefaultCalendar() -> EKCalendar? {
         return eventStore.defaultCalendarForNewReminders() ?? eventStore.calendars(for: .reminder).first
     }
+
+    func getReminder(withIdentifier identifier: String) -> EKReminder? {
+        return eventStore.calendarItem(withIdentifier: identifier) as? EKReminder
+    }
+
+    func loadReminders(in calendars: [EKCalendar]) async -> [EKReminder] {
+        let predicate = eventStore.predicateForReminders(in: calendars)
+        return await fetchReminders(matching: predicate)
+    }
     
     private func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder] {
         await withCheckedContinuation { continuation in
@@ -67,9 +76,8 @@ class RemindersService {
 
     func getReminders(of calendarIdentifiers: [String]) async -> [ReminderList] {
         let calendars = getCalendars().filter({ calendarIdentifiers.contains($0.calendarIdentifier) })
-        let predicate = eventStore.predicateForReminders(in: calendars)
         let remindersByCalendar = Dictionary(
-            grouping: await fetchReminders(matching: predicate),
+            grouping: await loadReminders(in: calendars),
             by: { $0.calendar.calendarIdentifier }
         )
 
