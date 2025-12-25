@@ -65,6 +65,7 @@ enum RemindersMenuBarLocalizedKeys: String {
     case aboutRemindersMenuBarWindowTitle
     case appVersionDescription
     case remindersMenuBarAppAboutDescription
+    case remindersMenuBarBobAboutDescription
     case remindersMenuBarGitHubAboutDescription
     case seeMoreOnGitHubButton
     case keyboardShortcutWindowTitle

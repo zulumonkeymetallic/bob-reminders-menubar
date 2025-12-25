@@ -27,6 +27,7 @@ struct AboutView: View {
                         "GNU General Public License v3.0"
                     ))
                     Text(rmbLocalized(.remindersMenuBarGitHubAboutDescription))
+                    Text(rmbLocalized(.remindersMenuBarBobAboutDescription))
                 }
                 .font(.system(size: 11))
                 .frame(maxHeight: .infinity)
