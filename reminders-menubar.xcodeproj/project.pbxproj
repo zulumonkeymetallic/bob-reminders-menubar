@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		202131CA937C4D558D3AE351 /* SettingsBarSyncIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 202131CA937C4D558D3AE350 /* SettingsBarSyncIndicator.swift */; };
+		3870B5AE2EF17A170011CCD5 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = FB0000032E7F7001000F103 /* FirebaseFunctions */; };
 		38B2A5EC2E7F56A3000DE3AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38B2A5EB2E7F56A3000DE3AE /* GoogleService-Info.plist */; };
 		38B2A5ED2E7F56A3000DE3AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38B2A5EB2E7F56A3000DE3AE /* GoogleService-Info.plist */; };
 		3AFB10012E7F56A3000DE3AE /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFB00012E7F56A3000DE3AE /* FirebaseManager.swift */; };
@@ -15,7 +17,6 @@
 		3AFB10042E7F56A3000DE3AE /* FirebaseAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFB00042E7F56A3000DE3AE /* FirebaseAuthView.swift */; };
 		3AFB11012E8F56A3000DE3BF /* SyncFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFB01012E8F56A3000DE3AF /* SyncFeedbackService.swift */; };
 		3AFB11022E8F56A3000DE3BF /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFB01022E8F56A3000DE3AF /* BackgroundSyncService.swift */; };
-		3AFB11032E8F56A3000DE3BF /* ThemeCalendarMappingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFB01032E8F56A3000DE3AF /* ThemeCalendarMappingView.swift */; };
 		7102423025F55D5600451D15 /* ReminderInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7102422F25F55D5600451D15 /* ReminderInterval.swift */; };
 		71032A8F24C21F0F00A8006C /* FormNewReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71032A8E24C21F0F00A8006C /* FormNewReminderView.swift */; };
 		71059DAB25CA5244001F3063 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71059DAA25CA5244001F3063 /* AppDelegate.swift */; };
@@ -43,7 +44,6 @@
 		7156444226031CA9005E81FD /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7156444126031CA9005E81FD /* Array+Extension.swift */; };
 		71564448260324FA005E81FD /* PrioritizedReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71564447260324FA005E81FD /* PrioritizedReminders.swift */; };
 		715B4DD228D41071008C6683 /* SettingsBarGearMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715B4DD128D41071008C6683 /* SettingsBarGearMenu.swift */; };
-		202131CA937C4D558D3AE351 /* SettingsBarSyncIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 202131CA937C4D558D3AE350 /* SettingsBarSyncIndicator.swift */; };
 		715B4DD528D56FE5008C6683 /* KeyboardShortcutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715B4DD428D56FE5008C6683 /* KeyboardShortcutService.swift */; };
 		715B4DD728D59BF2008C6683 /* SettingsBarFilterMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715B4DD628D59BF2008C6683 /* SettingsBarFilterMenu.swift */; };
 		715B4DD928D59D8D008C6683 /* SettingsBarToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715B4DD828D59D8D008C6683 /* SettingsBarToggleButton.swift */; };
@@ -109,14 +109,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		202131CA937C4D558D3AE350 /* SettingsBarSyncIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsBarSyncIndicator.swift; sourceTree = "<group>"; };
 		38B2A5EB2E7F56A3000DE3AE /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		38CC16262EFAABAA00FC06A6 /* Reminders MenuBarRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Reminders MenuBarRelease.entitlements"; sourceTree = "<group>"; };
 		3AFB00012E7F56A3000DE3AE /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		3AFB00022E7F56A3000DE3AE /* FirebaseSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseSyncService.swift; sourceTree = "<group>"; };
 		3AFB00032E7F56A3000DE3AE /* SyncLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncLogService.swift; sourceTree = "<group>"; };
 		3AFB00042E7F56A3000DE3AE /* FirebaseAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthView.swift; sourceTree = "<group>"; };
 		3AFB01012E8F56A3000DE3AF /* SyncFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncFeedbackService.swift; sourceTree = "<group>"; };
 		3AFB01022E8F56A3000DE3AF /* BackgroundSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncService.swift; sourceTree = "<group>"; };
-		3AFB01032E8F56A3000DE3AF /* ThemeCalendarMappingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCalendarMappingView.swift; sourceTree = "<group>"; };
 		7102422F25F55D5600451D15 /* ReminderInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderInterval.swift; sourceTree = "<group>"; };
 		71032A8E24C21F0F00A8006C /* FormNewReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormNewReminderView.swift; sourceTree = "<group>"; };
 		71059DA825CA5244001F3063 /* Reminders MenuBar Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Reminders MenuBar Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -148,7 +149,6 @@
 		7156444126031CA9005E81FD /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		71564447260324FA005E81FD /* PrioritizedReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrioritizedReminders.swift; sourceTree = "<group>"; };
 		715B4DD128D41071008C6683 /* SettingsBarGearMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsBarGearMenu.swift; sourceTree = "<group>"; };
-		202131CA937C4D558D3AE350 /* SettingsBarSyncIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsBarSyncIndicator.swift; sourceTree = "<group>"; };
 		715B4DD428D56FE5008C6683 /* KeyboardShortcutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutService.swift; sourceTree = "<group>"; };
 		715B4DD628D59BF2008C6683 /* SettingsBarFilterMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsBarFilterMenu.swift; sourceTree = "<group>"; };
 		715B4DD828D59D8D008C6683 /* SettingsBarToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsBarToggleButton.swift; sourceTree = "<group>"; };
@@ -208,6 +208,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3870B5AE2EF17A170011CCD5 /* FirebaseFunctions in Frameworks */,
 				716BCF0E28C97C7100537081 /* KeyboardShortcuts in Frameworks */,
 				FB1000012E7F7001000F201 /* FirebaseAuth in Frameworks */,
 				FB1000022E7F7001000F202 /* FirebaseFirestore in Frameworks */,
@@ -278,6 +279,7 @@
 		712C32A724BF939100AC75E2 = {
 			isa = PBXGroup;
 			children = (
+				38CC16262EFAABAA00FC06A6 /* Reminders MenuBarRelease.entitlements */,
 				38B2A5EB2E7F56A3000DE3AE /* GoogleService-Info.plist */,
 				712C32B224BF939100AC75E2 /* reminders-menubar */,
 				71059DA925CA5244001F3063 /* reminders-menubar-launcher */,
@@ -327,7 +329,6 @@
 				71E51D5725BFB8CF009A4B56 /* AboutView.swift */,
 				718C813528D01CCE00BAC2D0 /* KeyboardShortcutView.swift */,
 				3AFB00042E7F56A3000DE3AE /* FirebaseAuthView.swift */,
-				3AFB01032E8F56A3000DE3AF /* ThemeCalendarMappingView.swift */,
 			);
 			path = Windows;
 			sourceTree = "<group>";
@@ -476,6 +477,7 @@
 				716BCF0D28C97C7100537081 /* KeyboardShortcuts */,
 				FB0000012E7F7001000F101 /* FirebaseAuth */,
 				FB0000022E7F7001000F102 /* FirebaseFirestore */,
+				FB0000032E7F7001000F103 /* FirebaseFunctions */,
 				GS0000012E7F9001000F201 /* GoogleSignIn */,
 			);
 			productName = "reminders-menubar";
@@ -675,7 +677,6 @@
 				716F69F02D641E2F0080A5F1 /* ReminderChangePriorityOptionMenu.swift in Sources */,
 				3AFB11012E8F56A3000DE3BF /* SyncFeedbackService.swift in Sources */,
 				3AFB11022E8F56A3000DE3BF /* BackgroundSyncService.swift in Sources */,
-				3AFB11032E8F56A3000DE3BF /* ThemeCalendarMappingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -694,7 +695,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = J877BRYKD6;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "reminders-menubar-launcher/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -721,7 +722,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = J877BRYKD6;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "reminders-menubar-launcher/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -729,7 +730,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech.bob.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -774,7 +775,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 3398VKLH28;
+				DEVELOPMENT_TEAM = J877BRYKD6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -841,7 +842,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 3398VKLH28;
+				DEVELOPMENT_TEAM = J877BRYKD6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -857,6 +858,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -886,7 +888,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.25.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech.bob;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech.bob.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -897,7 +899,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "reminders-menubar/reminders_menubar.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Reminders MenuBarRelease.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -916,7 +918,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.25.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech.bob;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jc1.tech.bob.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -997,6 +999,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FB0000002E7F7001000F100 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		FB0000032E7F7001000F103 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB0000002E7F7001000F100 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
 		};
 		GS0000012E7F9001000F201 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;

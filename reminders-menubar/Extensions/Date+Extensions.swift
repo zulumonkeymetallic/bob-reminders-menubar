@@ -27,17 +27,18 @@ extension Date {
     }
     
     static func nextExactHour(of date: Date = Date(), allowDayChange: Bool = false) -> Date {
-        let today = Date()
-        let todayNextHour = Calendar.current.date(byAdding: .hour, value: 1, to: today)!
-        let isNextHourChangingDay = !todayNextHour.isToday
-        
-        var hourComponent = Calendar.current.dateComponents([.hour], from: today)
+        let calendar = Calendar.current
+        let now = Date()
+        guard let nextHourFromNow = calendar.date(byAdding: .hour, value: 1, to: now) else { return date }
+        let isNextHourChangingDay = !calendar.isDateInToday(nextHourFromNow)
+
+        var hourComponent = calendar.dateComponents([.hour], from: now)
         if allowDayChange || !isNextHourChangingDay {
-            hourComponent.hour! += 1
+            hourComponent.hour = (hourComponent.hour ?? 0) + 1
         }
-        
-        let dateWithoutTime = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: date)!
-        return Calendar.current.date(byAdding: hourComponent, to: dateWithoutTime)!
+
+        guard let dateWithoutTime = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: date) else { return date }
+        return calendar.date(byAdding: hourComponent, to: dateWithoutTime) ?? dateWithoutTime
     }
     
     static func nextYear(of date: Date = Date()) -> Date {

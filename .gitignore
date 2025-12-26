@@ -108,3 +108,17 @@ build_xcode/
 build.log
 build_xcode_build.log
 Reminders-MenuBar.dmg
+
+# Local build artifacts (do not commit)
+build_xcode/
+build.log
+build_xcode_build.log
+Reminders-MenuBar.dmg
+
+# CLI build artifacts (do not commit)
+build_out/
+build_cli_out/
+build_cli_bob/
+build_cli.log
+build_cli_fix.log
+build_cli_last.log

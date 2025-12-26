@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppCommands: Commands {
     @ObservedObject private var manualSyncService = ManualSyncService.shared
+    @ObservedObject private var prefs = UserPreferences.shared
 
     @CommandsBuilder var body: some Commands {
         CommandMenu(Text(verbatim: "Bob")) {
@@ -9,10 +10,32 @@ struct AppCommands: Commands {
                 .keyboardShortcut(KeyEquivalent("s"), modifiers: [.command, .shift])
                 .disabled(manualSyncService.isSyncing)
 
-            Button("Open Bob Auth…") { FirebaseAuthView.showWindow() }
+            Button("Sign In to Bob…") { FirebaseAuthView.showWindow() }
                 .keyboardShortcut(KeyEquivalent("b"), modifiers: [.command, .option])
 
-            Button("Theme → List Mapping…") { ThemeCalendarMappingView.showWindow() }
+            // Theme → List Mapping removed; handled via tags
+
+            Divider()
+
+            // Stay Signed In toggle
+            Toggle(isOn: $prefs.staySignedIn) {
+                Text("Stay Signed In")
+            }
+
+            Toggle(isOn: $prefs.showBobMetadataInNotes) {
+                Text("Show Bob Metadata in Notes")
+            }
+
+            // Delete all duplicates action
+            Button("Delete All Duplicates…") {
+                Task {
+                    let result = await FirebaseSyncService.shared.deleteAllDuplicates(hardDelete: true)
+                    let msg = result.error == nil ?
+                        "Deleted \(result.deleted) duplicates across \(result.groups) groups" :
+                        "Delete duplicates failed: \(result.error!)"
+                    SyncLogService.shared.logEvent(tag: "dedupe", level: result.error == nil ? "INFO" : "ERROR", message: msg)
+                }
+            }
 
             Divider()
 

@@ -23,10 +23,16 @@ struct SettingsBarGearMenu: View {
                         Image(systemName: "exclamationmark.circle")
                         Text(rmbLocalized(.updateAvailableNoticeButton))
                     }
-                    
+
                     Divider()
                 }
-                
+
+                Button(action: {
+                    FirebaseAuthView.showWindow()
+                }) {
+                    Label("Sign In to Bob…", systemImage: "person.crop.circle.badge.checkmark")
+                }
+
                 Button(action: {
                     userPreferences.launchAtLoginIsEnabled.toggle()
                 }) {
@@ -37,12 +43,21 @@ struct SettingsBarGearMenu: View {
                         withPadding: false
                     )
                 }
-                
+
+                Button(action: {
+                    userPreferences.showBobMetadataInNotes.toggle()
+                }) {
+                    SelectableView(
+                        title: "Show Bob Metadata in Notes",
+                        isSelected: userPreferences.showBobMetadataInNotes,
+                        withPadding: false
+                    )
+                }
+
                 visualCustomizationOptions()
 
                 // Bob Auth & Sync
                 Menu {
-                    Button("Open Bob Auth…") { FirebaseAuthView.showWindow() }
                     Button("Sync with Bob") { ManualSyncService.shared.trigger(reason: "Settings Menu") }
                     .disabled(manualSyncService.isSyncing)
                     Button("Open Sync Log") {
@@ -70,11 +85,52 @@ struct SettingsBarGearMenu: View {
                         }
                     }
                     Divider()
+                    // Duplicate maintenance
+                    Menu("Duplicates") {
+                        Button("Mark Duplicates Complete (TTL)") {
+                            Task {
+                                let res = await FirebaseSyncService.shared.deleteAllDuplicates(hardDelete: false)
+                                if let err = res.error {
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "ERROR", message: err)
+                                    await SyncFeedbackService.shared.show(message: "Dedupe failed: \(err)")
+                                } else {
+                                    let msg = "Completed \(res.deleted) duplicates across \(res.groups) groups"
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "INFO", message: msg)
+                                    await SyncFeedbackService.shared.show(message: msg)
+                                }
+                            }
+                        }
+                        Button("Diagnose Duplicates (Debug)") {
+                            Task {
+                                let diag = await FirebaseSyncService.shared.diagnoseDuplicates()
+                                if let err = diag.error {
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "ERROR", message: err)
+                                    await SyncFeedbackService.shared.show(message: "Diagnose error: \(err)")
+                                } else {
+                                    let msg = "Diagnosed \(diag.processed) tasks, groups: key=\(diag.keyGroups) rid=\(diag.ridGroups)"
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "INFO", message: msg)
+                                    await SyncFeedbackService.shared.show(message: msg)
+                                }
+                            }
+                        }
+                        Button("Delete Duplicates Now (Hard Delete)") {
+                            Task {
+                                let res = await FirebaseSyncService.shared.deleteAllDuplicates(hardDelete: true)
+                                if let err = res.error {
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "ERROR", message: err)
+                                    await SyncFeedbackService.shared.show(message: "Dedupe failed: \(err)")
+                                } else {
+                                    let msg = "Deleted \(res.deleted) duplicates across \(res.groups) groups"
+                                    SyncLogService.shared.logEvent(tag: "dedupe", level: "INFO", message: msg)
+                                    await SyncFeedbackService.shared.show(message: msg)
+                                }
+                            }
+                        }
+                    }
                     Button(action: { userPreferences.syncDryRun.toggle() }) {
                         SelectableView(title: "Dry-Run Mode (no writes)", isSelected: userPreferences.syncDryRun)
                     }
-                    Divider()
-                    Button("Theme → List Mapping…") { ThemeCalendarMappingView.showWindow() }
+                    // Theme → List Mapping removed; handled via tags
                     if let summary = UserPreferences.shared.lastSyncSummary, !summary.isEmpty {
                         Divider()
                         Text("Last Sync: \(summary)")

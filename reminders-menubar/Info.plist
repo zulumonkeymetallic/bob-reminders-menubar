@@ -10,6 +10,8 @@
 	<string></string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>AppIdentifierPrefix</key>
+	<string>$(AppIdentifierPrefix)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -25,7 +27,7 @@
 			<string>google-signin</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.944624475821-6rn0knvq5ucm8j054fkufh3nu8ttqeof</string>
+				<string>com.googleusercontent.apps.944624475821-tup3arrvljaj82ds8ce9is67hl30c473</string>
 			</array>
 		</dict>
 	</array>

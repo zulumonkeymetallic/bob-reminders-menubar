@@ -125,6 +125,15 @@ class RemindersService {
         }
     }
 
+    // Convenience: fetch all reminders within the provided calendars.
+    func fetchReminders(in calendars: [EKCalendar]) async -> [EKReminder] {
+        guard let eventStore else {
+            return []
+        }
+        let predicate = eventStore.predicateForReminders(in: calendars)
+        return await fetchReminders(matching: predicate)
+    }
+
     private func createReminderItems(for calendarReminders: [EKReminder]) -> [ReminderItem] {
         var reminderListItems: [ReminderItem] = []
         

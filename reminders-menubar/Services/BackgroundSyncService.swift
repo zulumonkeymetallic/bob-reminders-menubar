@@ -12,7 +12,13 @@ final class BackgroundSyncService: ObservableObject {
     private var scheduler: NSBackgroundActivityScheduler?
 
     func applyPreference() {
-        if UserPreferences.shared.enableBackgroundSync { start() } else { stop() }
+        if UserPreferences.shared.enableBackgroundSync {
+            SyncLogService.shared.logEvent(tag: "bg-sync", level: "INFO", message: "Enabling background sync")
+            start()
+        } else {
+            SyncLogService.shared.logEvent(tag: "bg-sync", level: "INFO", message: "Disabling background sync")
+            stop()
+        }
     }
 
     func start() {
@@ -23,11 +29,21 @@ final class BackgroundSyncService: ObservableObject {
         scheduler.interval = TimeInterval(minutes * 60)
         scheduler.tolerance = min(scheduler.interval / 2.0, 3600)
         scheduler.repeats = true
+        SyncLogService.shared.logEvent(
+            tag: "bg-sync",
+            level: "INFO",
+            message: "Scheduled background sync every \(minutes) min (tol=\(Int(scheduler.tolerance))s)"
+        )
         scheduler.schedule { completion in
             Task {
                 // Preflight
-                if FirebaseManager.shared.db != nil, await RemindersService.shared.hasFullRemindersAccess() {
-                    _ = await FirebaseSyncService.shared.syncNow(targetCalendar: nil)
+                if FirebaseManager.shared.firestore != nil, await RemindersService.shared.hasFullRemindersAccess() {
+                    let now = Date()
+                    let lastFull = await MainActor.run { UserPreferences.shared.lastFullSyncDate }
+                    let sixHours: TimeInterval = 6 * 60 * 60
+                    let doFull = (lastFull == nil) || (now.timeIntervalSince(lastFull!) >= sixHours)
+                    let mode: FirebaseSyncService.SyncMode = doFull ? .full : .delta
+                    _ = await FirebaseSyncService.shared.syncNow(mode: mode, targetCalendar: nil)
                 }
                 completion(.finished)
             }
@@ -38,6 +54,7 @@ final class BackgroundSyncService: ObservableObject {
     func stop() {
         scheduler?.invalidate()
         scheduler = nil
+        SyncLogService.shared.logEvent(tag: "bg-sync", level: "INFO", message: "Background sync stopped")
     }
 }
 
@@ -61,7 +78,7 @@ final class ManualSyncService: ObservableObject {
         }
 
         #if canImport(FirebaseAuth)
-        if FirebaseManager.shared.db == nil || Auth.auth().currentUser == nil {
+        if FirebaseManager.shared.firestore == nil || Auth.auth().currentUser == nil {
             SyncLogService.shared.logEvent(tag: "sync", level: "WARN", message: "Manual sync aborted (\(reason)): not authenticated or Firebase not configured")
             if showToast { SyncFeedbackService.shared.show(message: "Sign in with Bob before syncing") }
             return
@@ -73,7 +90,7 @@ final class ManualSyncService: ObservableObject {
 
         Task { [weak self] in
             SyncLogService.shared.logEvent(tag: "sync", level: "INFO", message: "Manual sync started (\(reason))")
-            let result = await FirebaseSyncService.shared.syncNow(targetCalendar: calendar)
+            let result = await FirebaseSyncService.shared.syncNow(mode: .full, targetCalendar: calendar)
             await delegate.remindersData.update()
 
             if !result.errors.isEmpty {

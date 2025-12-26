@@ -2,16 +2,17 @@ import Foundation
 
 enum AppConstants {
     static let currentVersion: String = {
-        guard let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+        guard let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+              let buildVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String else {
             return "-"
         }
 
-        return "v\(bundleVersion)"
+        return "v\(bundleVersion) (build: \(buildVersion))"
     }()
     
     static let appName = "Reminders MenuBar"
     static let mainBundleId = "com.jc1.tech.bob"
-    static let launcherBundleId = "com.jc1.tech.bob.launcher"
+    static let launcherBundleId = "com.jc1.tech"
 
     // Toggle native macOS Reminders integration. When false the app avoids
     // hitting CalendarAgent (EventKit) and operates in Firebase-only mode.

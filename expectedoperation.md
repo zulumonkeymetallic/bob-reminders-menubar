@@ -15,18 +15,23 @@ It covers:
 
 ## 1. Metadata Schema (Reminders Notes)
 
-Every reminder that participates in Bob sync starts with a canonical header followed by tagged lines. Example:
+Every reminder that participates in Bob sync starts with a canonical header appended after user notes. Immediately before this header we append plain deep links to Bob entities (no labels). Example:
 
 ```
-BOB: taskId=TASK-1234 taskRef=TASK-1234 storyId=STRY-0007 storyRef=STRY-7 goalId=GOAL-42 status=open due=2025-09-30T08:00:00Z synced=2025-09-30T10:15:02Z
+<user-authored notes, if any>
+
+https://bob.jc1.tech/tasks/TASK-1234
+https://bob.jc1.tech/stories/STRY-7
+https://bob.jc1.tech/goals/GOAL-42
+
+-------
+BOB: taskId=TASK-1234 taskRef=TASK-1234 storyId=STRY-0007 storyRef=STRRY-7 goalId=GOAL-42 status=open due=2025-09-30T08:00:00Z synced=2025-09-30T10:15:02Z
 #sprint: Sprint 32
 #theme: Customer Delight
 #task: TASK-1234
 #story: STRY-7
 #goal: GOAL-42
 #tags: Sprint 32
-
-<user-authored notes, if any>
 ```
 
 **Key fields written & parsed:**
@@ -43,6 +48,7 @@ BOB: taskId=TASK-1234 taskRef=TASK-1234 storyId=STRY-0007 storyRef=STRY-7 goalId
 - `#sprint`: Friendly sprint name (if available from story context).
 - `#theme`: Theme name associated with the story/goal (used for calendar mapping).
 - `#tags`: Mirrors the sprint name to allow tag-based filtering in Reminders.
+- Plain deep links are appended (one per line) for task, story, and goal. Any previously inserted labeled lines (e.g., `Task: …`) or older `bob.jc1.tech` deep links are removed during parsing to avoid duplication.
 - `#task`, `#story`, `#goal`: Duplicate the respective references for user visibility.
 
 The parser preserves arbitrary user text after the tagged lines and regenerates headers when metadata changes.
@@ -139,10 +145,31 @@ This gives full visibility into what will happen before executing writes.
 - Theme names retrieved from stories/goals determine the desired reminder calendar.
 - `UserPreferences.themeCalendarMap` expresses explicit mappings. If absent, we attempt to locate or (non-dry-run) create a calendar named after the theme.
 - Reminders are moved into the correct calendar when Bob is the authoritative source and its theme differs from the current reminder calendar.
+- Tags on the reminder include the plain Theme name and Sprint name (no prefixes). Legacy `theme-…`/`sprint-…` tags are cleaned up on sync.
 
 ---
 
-## 6. Known Limitations / TODOs
+## 6. Triage Classification (Optional)
+
+When enabled via preferences, reminders in a configured triage list are classified as Personal vs Work before any Firestore import:
+
+- Preferences: `enableTriageClassification`, `triageCalendarName`, `workCalendarName` (optional), `llmTriageEndpoint` (optional).
+- If a triage reminder is classified as Work with sufficient confidence:
+  - The reminder is tagged `work` and, if `workCalendarName` is set, moved into that list.
+  - The reminder is NOT imported into Firestore (personal-only datastore).
+  - An informational line is logged to `sync.log` under the `triage` tag; no activity is written to Firestore.
+- If classified as Personal (or unknown), the reminder proceeds to the normal import flow.
+- Items already in `workCalendarName` are always excluded from Firestore import.
+
+Implementation details:
+
+- `TriageClassifierService` first attempts to use a user-configured HTTP endpoint (3s timeout). Expected response: `{ persona: "work"|"personal", confidence: Number }`.
+- On failure or when no endpoint is configured, a heuristic keyword model provides a best-effort classification.
+- All triage actions honour `syncDryRun` (no moves/writes when enabled).
+
+---
+
+## 7. Known Limitations / TODOs
 
 - **Simultaneous edits**: If title and due date are changed on both sides more or less simultaneously, the most recent timestamp wins; we do not attempt field-level merges.
 - **Firehose context fields**: We do not currently infer story/goal references when Reminders are imported without any descriptive context. Users must maintain these via Bob.

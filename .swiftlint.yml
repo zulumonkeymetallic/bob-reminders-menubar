@@ -77,6 +77,7 @@ conditional_returns_on_newline:
 identifier_name:
   excluded:
   - id
+  - db
 
 multiline_arguments:
   first_argument_location: next_line
@@ -86,7 +87,13 @@ excluded:
  - Carthage
  - Pods
  - build
+ - build_xcode
+ - build_out
  - SourcePackages
+ - build_cli_bob
+ - build_cli_bob/SourcePackages
+ - "**/SourcePackages"
+ - "**/DerivedSources"
 
 custom_rules:
   comments_space:

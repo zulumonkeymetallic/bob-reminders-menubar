@@ -19,13 +19,24 @@ private enum PreferencesKeys {
     // Sync status
     static let lastSyncSummary = "lastSyncSummary"
     static let lastSyncDate = "lastSyncDate"
+    static let lastFullSyncDate = "lastFullSyncDate"
+    static let lastDeltaSyncDate = "lastDeltaSyncDate"
     // Background sync
     static let enableBackgroundSync = "enableBackgroundSync"
     static let backgroundSyncIntervalMinutes = "backgroundSyncIntervalMinutes"
     // Sync behavior
     static let syncDryRun = "syncDryRun"
+    static let showBobMetadataInNotes = "showBobMetadataInNotes"
+    static let syncInstanceId = "syncInstanceId"
     // Theme→Calendar mapping (theme name -> calendar identifier)
     static let themeCalendarMap = "themeCalendarMap"
+    // Triage classification
+    static let enableTriageClassification = "enableTriageClassification"
+    static let triageCalendarName = "triageCalendarName"
+    static let workCalendarName = "workCalendarName"
+    static let llmTriageEndpoint = "llmTriageEndpoint"
+    // Auth/session
+    static let staySignedIn = "staySignedIn"
 }
 
 class UserPreferences: ObservableObject {
@@ -38,6 +49,16 @@ class UserPreferences: ObservableObject {
     private static let defaults = UserDefaults.standard
     
     @Published var remindersMenuBarOpeningEvent = false
+    /// Stable per-install identifier used for sync diagnostics/claims.
+    var syncInstanceId: String {
+        if let existing = UserPreferences.defaults.string(forKey: PreferencesKeys.syncInstanceId),
+           !existing.isEmpty {
+            return existing
+        }
+        let newId = UUID().uuidString
+        UserPreferences.defaults.set(newId, forKey: PreferencesKeys.syncInstanceId)
+        return newId
+    }
     
     @Published var reminderMenuBarIcon: RmbIcon = {
         guard let menuBarIconString = defaults.string(forKey: PreferencesKeys.reminderMenuBarIcon) else {
@@ -133,13 +154,28 @@ class UserPreferences: ObservableObject {
     
     var launchAtLoginIsEnabled: Bool {
         get {
-            let allJobs = SMCopyAllJobDictionaries(kSMDomainUserLaunchd).takeRetainedValue() as? [[String: AnyObject]]
-            let launcherJob = allJobs?.first { $0["Label"] as? String == AppConstants.launcherBundleId }
-            return launcherJob?["OnDemand"] as? Bool ?? false
+            if #available(macOS 13.0, *) {
+                let service = SMAppService.loginItem(identifier: AppConstants.launcherBundleId)
+                return service.status == .enabled
+            } else {
+                // Fallback: reflect the last requested state without using deprecated APIs
+                return UserPreferences.defaults.bool(forKey: "launchAtLoginCached")
+            }
         }
-        
+
         set {
-            SMLoginItemSetEnabled(AppConstants.launcherBundleId as CFString, newValue)
+            if #available(macOS 13.0, *) {
+                let service = SMAppService.loginItem(identifier: AppConstants.launcherBundleId)
+                do {
+                    if newValue { try service.register() } else { try service.unregister() }
+                } catch {
+                    // As a fallback, attempt legacy API if available
+                    SMLoginItemSetEnabled(AppConstants.launcherBundleId as CFString, newValue)
+                }
+            } else {
+                SMLoginItemSetEnabled(AppConstants.launcherBundleId as CFString, newValue)
+            }
+            UserPreferences.defaults.set(newValue, forKey: "launchAtLoginCached")
         }
     }
     
@@ -203,6 +239,15 @@ class UserPreferences: ObservableObject {
         }
     }
 
+    // MARK: - Authentication / Session
+    @Published var staySignedIn: Bool = {
+        return defaults.bool(forKey: PreferencesKeys.staySignedIn)
+    }() {
+        didSet {
+            UserPreferences.defaults.set(staySignedIn, forKey: PreferencesKeys.staySignedIn)
+        }
+    }
+
     @Published var lastSyncDate: Date? = {
         guard defaults.object(forKey: PreferencesKeys.lastSyncDate) != nil else { return nil }
         let timestamp = defaults.double(forKey: PreferencesKeys.lastSyncDate)
@@ -218,6 +263,38 @@ class UserPreferences: ObservableObject {
         }
     }
 
+    // Timestamp of the last full sync (6-hour cadence)
+    @Published var lastFullSyncDate: Date? = {
+        guard defaults.object(forKey: PreferencesKeys.lastFullSyncDate) != nil else { return nil }
+        let ts = defaults.double(forKey: PreferencesKeys.lastFullSyncDate)
+        guard ts > 0 else { return nil }
+        return Date(timeIntervalSince1970: ts)
+    }() {
+        didSet {
+            if let date = lastFullSyncDate {
+                UserPreferences.defaults.set(date.timeIntervalSince1970, forKey: PreferencesKeys.lastFullSyncDate)
+            } else {
+                UserPreferences.defaults.removeObject(forKey: PreferencesKeys.lastFullSyncDate)
+            }
+        }
+    }
+
+    // Timestamp of the last delta sync (hourly cadence)
+    @Published var lastDeltaSyncDate: Date? = {
+        guard defaults.object(forKey: PreferencesKeys.lastDeltaSyncDate) != nil else { return nil }
+        let ts = defaults.double(forKey: PreferencesKeys.lastDeltaSyncDate)
+        guard ts > 0 else { return nil }
+        return Date(timeIntervalSince1970: ts)
+    }() {
+        didSet {
+            if let date = lastDeltaSyncDate {
+                UserPreferences.defaults.set(date.timeIntervalSince1970, forKey: PreferencesKeys.lastDeltaSyncDate)
+            } else {
+                UserPreferences.defaults.removeObject(forKey: PreferencesKeys.lastDeltaSyncDate)
+            }
+        }
+    }
+
     // MARK: - Background Sync
     @Published var enableBackgroundSync: Bool = {
         return defaults.bool(forKey: PreferencesKeys.enableBackgroundSync)
@@ -229,7 +306,12 @@ class UserPreferences: ObservableObject {
         let interval = defaults.integer(forKey: PreferencesKeys.backgroundSyncIntervalMinutes)
         return interval > 0 ? interval : 60
     }() {
-        didSet { UserPreferences.defaults.set(backgroundSyncIntervalMinutes, forKey: PreferencesKeys.backgroundSyncIntervalMinutes) }
+        didSet {
+            UserPreferences.defaults.set(
+                backgroundSyncIntervalMinutes,
+                forKey: PreferencesKeys.backgroundSyncIntervalMinutes
+            )
+        }
     }
 
     // MARK: - Sync Behavior
@@ -239,10 +321,54 @@ class UserPreferences: ObservableObject {
         didSet { UserPreferences.defaults.set(syncDryRun, forKey: PreferencesKeys.syncDryRun) }
     }
 
+    @Published var showBobMetadataInNotes: Bool = {
+        if defaults.object(forKey: PreferencesKeys.showBobMetadataInNotes) == nil {
+            return true
+        }
+        return defaults.bool(forKey: PreferencesKeys.showBobMetadataInNotes)
+    }() {
+        didSet {
+            UserPreferences.defaults.set(showBobMetadataInNotes, forKey: PreferencesKeys.showBobMetadataInNotes)
+        }
+    }
+
     // MARK: - Theme→Calendar mapping
     @Published var themeCalendarMap: [String: String] = {
         return defaults.dictionary(forKey: PreferencesKeys.themeCalendarMap) as? [String: String] ?? [:]
     }() {
         didSet { UserPreferences.defaults.set(themeCalendarMap, forKey: PreferencesKeys.themeCalendarMap) }
+    }
+
+    // MARK: - Triage Classification
+    @Published var enableTriageClassification: Bool = {
+        return defaults.bool(forKey: PreferencesKeys.enableTriageClassification)
+    }() {
+        didSet {
+            UserPreferences.defaults.set(
+                enableTriageClassification,
+                forKey: PreferencesKeys.enableTriageClassification
+            )
+        }
+    }
+
+    // Optional: list names. If empty, classification is skipped.
+    @Published var triageCalendarName: String? = {
+        return defaults.string(forKey: PreferencesKeys.triageCalendarName)
+    }() {
+        didSet { UserPreferences.defaults.set(triageCalendarName, forKey: PreferencesKeys.triageCalendarName) }
+    }
+
+    @Published var workCalendarName: String? = {
+        return defaults.string(forKey: PreferencesKeys.workCalendarName)
+    }() {
+        didSet { UserPreferences.defaults.set(workCalendarName, forKey: PreferencesKeys.workCalendarName) }
+    }
+
+    // Optional: external HTTP endpoint for LLM classification.
+    // Expected to accept JSON and return { persona: "work"|"personal", confidence: Number }
+    @Published var llmTriageEndpoint: String? = {
+        return defaults.string(forKey: PreferencesKeys.llmTriageEndpoint)
+    }() {
+        didSet { UserPreferences.defaults.set(llmTriageEndpoint, forKey: PreferencesKeys.llmTriageEndpoint) }
     }
 }

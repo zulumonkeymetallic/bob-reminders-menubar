@@ -11,7 +11,13 @@ struct FirebaseAuthView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Bob Authentication").font(.title2).fontWeight(.semibold)
+            HStack(alignment: .firstTextBaseline) {
+                Text("Bob Authentication").font(.title2).fontWeight(.semibold)
+                Spacer()
+                Text("Version \(AppConstants.currentVersion)")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
 
             if let user = fb.currentUser {
                 let email = user.email ?? "anonymous"
@@ -59,8 +65,10 @@ struct FirebaseAuthView: View {
 
     private func signOutAll() {
         do {
+            logAuthUI(level: "INFO", message: "Sign out triggered from auth window")
             fb.googleSignOut()
             try fb.signOut()
+            logAuthUI(level: "INFO", message: "Sign out completed from auth window")
             message = "Signed out"
         } catch { message = describe(error, context: "Sign out") }
     }
@@ -87,11 +95,16 @@ struct FirebaseAuthView: View {
 
     private func signInGoogle() async {
         busy = true; defer { busy = false }
+        logAuthUI(level: "DEBUG", message: "UI starting Google sign-in (hasKeyWindow=\(NSApp.keyWindow != nil))")
         guard let window = NSApp.keyWindow else {
-            message = "No active window to present Google Sign-In"; return
+            let msg = "No active window to present Google Sign-In"
+            logAuthUI(level: "ERROR", message: "Cannot present Google Sign-In: \(msg)")
+            message = msg
+            return
         }
         do {
             try await fb.signInWithGoogle(presenting: window)
+            logAuthUI(level: "INFO", message: "Google sign-in completed from UI; waiting on Firebase exchange")
             message = "Signed in with Google"
         } catch { message = describe(error, context: "Google sign-in") }
     }
@@ -115,7 +128,17 @@ struct FirebaseAuthView: View {
             parts.append(underlying.localizedDescription)
         }
         let payload = parts.joined(separator: " — ")
-        SyncLogService.shared.logEvent(tag: "auth", level: "ERROR", message: "\(context): \(payload)")
+        var debugParts: [String] = []
+#if canImport(FirebaseAuth)
+        let uid = Auth.auth().currentUser?.uid ?? "nil"
+        debugParts.append("uid=\(uid)")
+        if nsError.domain == AuthErrorDomain,
+           AuthErrorCode.Code(rawValue: nsError.code) == .keychainError {
+            debugParts.append("keychainGroup=\(keychainAccessGroupHint())")
+        }
+#endif
+        let logMessage = ([context + ": " + payload] + debugParts).joined(separator: " | ")
+        logAuthUI(level: "ERROR", message: logMessage)
         return payload
     }
 
@@ -136,4 +159,26 @@ struct FirebaseAuthView: View {
 
 struct FirebaseAuthView_Previews: PreviewProvider {
     static var previews: some View { FirebaseAuthView() }
+}
+
+extension FirebaseAuthView {
+    private func logAuthUI(level: String = "DEBUG", message: String) {
+        SyncLogService.shared.logEvent(
+            tag: "auth",
+            level: level,
+            message: "[\(AppConstants.currentVersion)] \(message)"
+        )
+        SyncLogService.shared.logAuth(
+            level: level,
+            message: "[\(AppConstants.currentVersion)] \(message)"
+        )
+    }
+
+    private func keychainAccessGroupHint() -> String {
+        let bundleId = Bundle.main.bundleIdentifier ?? "?"
+        if let prefix = Bundle.main.infoDictionary?["AppIdentifierPrefix"] as? String {
+            return "\(prefix)\(bundleId)"
+        }
+        return bundleId
+    }
 }

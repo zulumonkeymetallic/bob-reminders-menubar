@@ -126,9 +126,6 @@
         }
       }
     },
-    "Add/Update" : {
-
-    },
     "Anonymous Sign In" : {
 
     },
@@ -1626,10 +1623,10 @@
     "Bob sync has not run yet" : {
 
     },
-    "Bob Themes" : {
+    "Bob Token (optional)" : {
 
     },
-    "Bob Token (optional)" : {
+    "bob: %lld" : {
 
     },
     "changeReminderDueDateMenuOption" : {
@@ -1981,6 +1978,18 @@
 
     },
     "custom token" : {
+
+    },
+    "Delete All Duplicates…" : {
+
+    },
+    "Delete Duplicates Now (Hard Delete)" : {
+
+    },
+    "Diagnose Duplicates (Debug)" : {
+
+    },
+    "Duplicates" : {
 
     },
     "editReminderDueDateNextWeekOption" : {
@@ -5391,13 +5400,10 @@
         }
       }
     },
-    "List" : {
+    "mac: %lld" : {
 
     },
-    "Loading Bob themes…" : {
-
-    },
-    "Loading…" : {
+    "Mark Duplicates Complete (TTL)" : {
 
     },
     "menuBarCounterSettingsMenu" : {
@@ -6525,13 +6531,13 @@
         }
       }
     },
-    "Open Bob Auth…" : {
-
-    },
     "Open Log Folder" : {
 
     },
     "Open Sync Log" : {
+
+    },
+    "Open tasks – Bob and Mac Reminders" : {
 
     },
     "openSystemPreferencesButton" : {
@@ -6911,9 +6917,6 @@
           }
         }
       }
-    },
-    "Refresh" : {
-
     },
     "reloadRemindersDataButton" : {
       "extractionState" : "manual",
@@ -8438,6 +8441,17 @@
         }
       }
     },
+    "remindersMenuBarBobAboutDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to sync reminders with the Bob Firestore app at bob.jc1.tech; for personal use only."
+          }
+        }
+      }
+    },
     "remindersMenuBarGitHubAboutDescription" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8687,9 +8701,6 @@
           }
         }
       }
-    },
-    "Remove" : {
-
     },
     "removeReminderAlertCancelButton" : {
       "extractionState" : "manual",
@@ -9444,12 +9455,6 @@
         }
       }
     },
-    "Select a Bob theme or type one to map it to a list." : {
-
-    },
-    "Select…" : {
-
-    },
     "selectListForSavingReminderButtonHelp" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9699,6 +9704,9 @@
           }
         }
       }
+    },
+    "Show Bob Metadata in Notes" : {
+
     },
     "showCompletedRemindersToggleButtonHelp" : {
       "extractionState" : "manual",
@@ -10271,6 +10279,9 @@
         }
       }
     },
+    "Sign In to Bob…" : {
+
+    },
     "Sign in with Google" : {
 
     },
@@ -10293,6 +10304,9 @@
         }
       }
     },
+    "Stay Signed In" : {
+
+    },
     "Sync with Bob" : {
 
     },
@@ -10300,15 +10314,6 @@
 
     },
     "Syncing with Bob…" : {
-
-    },
-    "Theme → List Mapping" : {
-
-    },
-    "Theme → List Mapping…" : {
-
-    },
-    "Theme name" : {
 
     },
     "upcomingRemindersAllTitle" : {
@@ -11280,6 +11285,9 @@
           }
         }
       }
+    },
+    "Version %@" : {
+
     }
   },
   "version" : "1.0"

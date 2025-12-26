@@ -1,3 +1,4 @@
+import Foundation
 import EventKit
 
 extension EKReminder {
@@ -162,8 +163,8 @@ extension EKReminder {
         dueDateComponents = dateComponents
 
         // NOTE: In Apple Reminders only reminders with time have an alarm.
-        if hasTime {
-            let ekAlarm = EKAlarm(absoluteDate: dateComponents.date!)
+        if hasTime, let dueDate = dateComponents.date {
+            let ekAlarm = EKAlarm(absoluteDate: dueDate)
             addAlarm(ekAlarm)
         }
     }
@@ -171,35 +172,99 @@ extension EKReminder {
     @MainActor
     @discardableResult
     func rmbUpdateTag(newTag: String?, removing previousTag: String?) -> Bool {
-        guard #available(macOS 12.0, *) else { return false }
-
-        func normalize(_ value: String?) -> String? {
-            guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
+        // Simplified: read current tags, apply change, and write via rmbSetTagsList
+        func normalized(_ string: String?) -> String? {
+            guard let trimmed = string?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
             return trimmed
         }
-
-        let normalizedPrevious = normalize(previousTag)
-        let normalizedNew = normalize(newTag)
-
-        var currentTags = (value(forKey: "tags") as? [String]) ?? []
-        let original = currentTags
-
-        if let previous = normalizedPrevious {
-            currentTags.removeAll { $0.compare(previous, options: .caseInsensitive) == .orderedSame }
+        var tags = rmbCurrentTags()
+        if let prev = normalized(previousTag) {
+            if let idx = tags.firstIndex(where: { $0.compare(prev, options: .caseInsensitive) == .orderedSame }) {
+                tags.remove(at: idx)
+            }
         }
-
-        if let desired = normalizedNew,
-           !currentTags.contains(where: { $0.compare(desired, options: .caseInsensitive) == .orderedSame }) {
-            currentTags.append(desired)
+        if let desired = normalized(newTag) {
+            // Canonicalize to single explicit tag
+            tags = [desired]
         }
+        return rmbSetTagsList(newTags: tags)
+    }
 
-        // Drop empty entries in case trimming removed everything
-        currentTags.removeAll { normalize($0) == nil }
-
-        if original != currentTags {
-            setValue(currentTags, forKey: "tags")
-            return true
+    @MainActor
+    func rmbCurrentTags() -> [String] {
+        // Read canonical tags from note metadata (#tags: value)
+        // Supports comma-separated tags: "#tags: tagA, tagB, tagC"
+        let content = notes ?? ""
+        let parts = content.components(separatedBy: "\n")
+        if let sep = parts.lastIndex(of: "-------") {
+            for line in parts.suffix(from: sep + 1) where line.hasPrefix("#tags: ") {
+                let raw = String(line.dropFirst("#tags: ".count))
+                let tokens = raw.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+                let cleaned = tokens.filter { !$0.isEmpty }
+                return cleaned
+            }
         }
-        return false
+        return []
+    }
+
+    @MainActor
+    @discardableResult
+    func rmbSetTagsList(newTags: [String]) -> Bool {
+        // Write the #tags line using a comma-separated list. Removes the line if list is empty.
+        var seen = Set<String>()
+        let desiredList = newTags.compactMap { raw -> String? in
+            let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty { return nil }
+            let key = trimmed.lowercased()
+            if seen.contains(key) { return nil }
+            seen.insert(key)
+            return trimmed
+        }
+        let desired = desiredList.joined(separator: ", ")
+
+        let originalNotes = notes ?? ""
+        var lines = originalNotes.components(separatedBy: "\n")
+        if let sepIndex = lines.lastIndex(of: "-------") {
+            var meta = Array(lines.suffix(from: sepIndex + 1))
+            var head = meta.first ?? "BOB:"
+            if !head.hasPrefix("BOB:") {
+                head = "BOB:"
+                meta.insert(head, at: 0)
+            }
+            let tagIdx = meta.firstIndex(where: { $0.hasPrefix("#tags:") })
+            let newLine = desired.isEmpty ? nil : "#tags: \(desired)"
+            var changed = false
+            if let idx = tagIdx {
+                if let newLine {
+                    if meta[idx] != newLine { meta[idx] = newLine; changed = true }
+                } else {
+                    meta.remove(at: idx)
+                    changed = true
+                }
+            } else if let newLine {
+                meta.append(newLine)
+                changed = true
+            }
+            if changed {
+                let prefix = Array(lines.prefix(upTo: sepIndex + 1))
+                let rebuilt = prefix + meta
+                notes = rebuilt.joined(separator: "\n")
+                return true
+            }
+            return false
+        }
+        // No metadata yet; only add if we have tags
+        guard !desired.isEmpty else { return false }
+        var rebuilt = lines
+        if !rebuilt.isEmpty,
+           let last = rebuilt.last,
+           !last.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            rebuilt.append("")
+        }
+        rebuilt.append("-------")
+        rebuilt.append("BOB:")
+        rebuilt.append("#tags: \(desired)")
+        notes = rebuilt.joined(separator: "\n")
+        return true
     }
 }
